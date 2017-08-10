@@ -17,7 +17,13 @@ from docopt import docopt
 import msutils
 import msutils.edition
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S',
+    style='{',
+    format='{asctime}  {levelname}  {name}  {message}',
+    filename=str(Path('~/Library/Logs/pdf_edition.log').expanduser()))
+logger = logging.getLogger(name='pdf_edition')
 
 _server_remote_path = Path('/Volumes/Server/')
 _server_local_path = Path('~/Server/').expanduser()
@@ -26,7 +32,7 @@ if _server_remote_path.exists():
 elif _server_local_path.exists():
     SERVER_PATH = _server_local_path
 else:
-    logging.critical("Can't find server location.")
+    logger.critical("Can't find server location.")
     sys.exit(1)
 
 COMBINED_PDF_TEMPLATE = '{page.date:MS_%Y_%m_%d.pdf}'
@@ -96,7 +102,7 @@ def run_applescript(script: str):
         stderr=subprocess.PIPE,
         encoding='utf-8')
     if result.stderr:
-        logging.error('AppleScript stderr: %s', result.stderr.rstrip())
+        logger.error('AppleScript stderr: %s', result.stderr.rstrip())
     return result.stdout.rstrip()
 
 
@@ -124,7 +130,7 @@ def export_indesign_page(page, date):
             pdf_file=pdfs_dir.joinpath(pdf_name),
             page_to_export=indd_page_num
             ))
-        logging.info('Exported PDF file: %24s', pdf_name)
+        logger.info('Exported PDF file: %24s', pdf_name)
 
 
 def export_front_jpg(page):
@@ -134,7 +140,7 @@ def export_front_jpg(page):
         indesign_file=page.path,
         jpg_file=jpg_name
         ))
-    logging.info('Exported front JPG: %24s', jpg_name.name)
+    logger.info('Exported front JPG: %24s', jpg_name.name)
 
 
 def export_with_ghostscript(export_file, *pdf_paths):
@@ -154,14 +160,14 @@ def save_combined_pdf(date):
     """Combine the web PDF files for date's edition using ghostscript"""
     files = msutils.edition_web_pdfs(date)
     if not files:
-        logging.error('No web PDF files found for ghostscript step')
+        logger.error('No web PDF files found for ghostscript step')
         sys.exit(1)
     combined_file = SERVER_PATH.joinpath(
         'Web PDFs',
         COMBINED_PDF_TEMPLATE.format(page=files[0]))
 
     export_with_ghostscript(combined_file, *[f.path for f in files])
-    logging.info('Saved combined PDF to file: %24s', combined_file.name)
+    logger.info('Saved combined PDF to file: %24s', combined_file.name)
 
 
 def in_place_reduce_size(pdf_path):
@@ -169,7 +175,7 @@ def in_place_reduce_size(pdf_path):
     tmp_name = pdf_path.with_name(pdf_path.name + '.tmp')
     export_with_ghostscript(tmp_name, pdf_path)
     tmp_name.replace(pdf_path)
-    logging.info('Reduced size of PDF: %24s', pdf_path.name)
+    logger.info('Reduced size of PDF: %24s', pdf_path.name)
 
 
 if __name__ == '__main__':
@@ -177,7 +183,7 @@ if __name__ == '__main__':
     try:
         files = msutils.edition_indd_files(edition_date)
     except msutils.NoEditionError as e:
-        logging.critical(e)
+        logger.critical(e)
         sys.exit(1)
 
     for f in files:
