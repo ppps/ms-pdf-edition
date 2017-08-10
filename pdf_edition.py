@@ -174,7 +174,12 @@ def in_place_reduce_size(pdf_path):
 
 if __name__ == '__main__':
     edition_date = datetime.strptime(docopt(__doc__)['DATE'], '%Y-%m-%d')
-    files = msutils.edition_indd_files(edition_date)
+    try:
+        files = msutils.edition_indd_files(edition_date)
+    except msutils.NoEditionError as e:
+        logging.critical(e)
+        sys.exit(1)
+
     for f in files:
         export_indesign_page(f, edition_date)
         if f.pages[0] == 1:
