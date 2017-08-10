@@ -58,6 +58,35 @@ end run
 '''
 
 
+as_export_jpg = '''\
+on export_jpg(posix_path, jpg_export_file)
+	tell application "Adobe InDesign CS4"
+		-- Suppress dialogs
+		set user interaction level of script preferences to never interact
+
+		open (POSIX file posix_path as alias)
+
+		tell JPEG export preferences
+			set JPEG Quality to medium
+			set JPEG Rendering style to progressive encoding
+			set resolution to 72
+			set Page String to "1"
+		end tell
+		export the active document format JPG to POSIX file jpg_export_file
+
+		close the active document
+
+		-- Restore dialogs
+		set user interaction level of script preferences to interact with all
+	end tell
+end export_jpg
+
+on run {{}}
+	export_jpg("{indesign_file}", "{jpg_file}")
+end run
+'''
+
+
 def run_applescript(script: str):
     """Run an AppleScript using subprocess and osascript"""
     result = subprocess.run(
@@ -98,6 +127,16 @@ def export_indesign_page(page, date):
         logging.info('Exported PDF file: %24s', pdf_name)
 
 
+def export_front_jpg(page):
+    jpg_name = SERVER_PATH.joinpath(
+        'Web PDFs', 'MS_{0:%Y_%m_%d}.jpg'.format(page.date))
+    run_applescript(as_export_jpg.format(
+        indesign_file=page.path,
+        jpg_file=jpg_name
+        ))
+    logging.info('Exported front JPG: %24s', jpg_name.name)
+
+
 def export_with_ghostscript(export_file, *pdf_paths):
     args = [
         'gs',
@@ -122,6 +161,7 @@ def save_combined_pdf(date):
         COMBINED_PDF_TEMPLATE.format(page=files[0]))
 
     export_with_ghostscript(combined_file, *[f.path for f in files])
+    logging.info('Saved combined PDF to file: %24s', combined_file.name)
 
 
 def in_place_reduce_size(pdf_path):
@@ -129,12 +169,16 @@ def in_place_reduce_size(pdf_path):
     tmp_name = pdf_path.with_name(pdf_path.name + '.tmp')
     export_with_ghostscript(tmp_name, pdf_path)
     tmp_name.replace(pdf_path)
+    logging.info('Reduced size of PDF: %24s', pdf_path.name)
+
 
 if __name__ == '__main__':
     edition_date = datetime.strptime(docopt(__doc__)['DATE'], '%Y-%m-%d')
     files = msutils.edition_indd_files(edition_date)
-#    for f in files: export_indesign_page(f, edition_date)
-#    save_combined_pdf(edition_date)
+    for f in files:
+        export_indesign_page(f, edition_date)
+        if f.pages[0] == 1:
+            export_front_jpg(f)
     for p in msutils.edition_web_pdfs(edition_date):
         in_place_reduce_size(p.path)
-
+    save_combined_pdf(edition_date)
