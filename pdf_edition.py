@@ -197,6 +197,11 @@ def main():
 
     for f in files:
         export_indesign_page(f, edition_date)
+        # FIXME: This blind check is what causes supplements
+        #        to replace the actual front page jpg.
+        #        Should check for either:
+        #           * No supplement prefix (but would break wraps)
+        #           * Designate wraps a specific letter (fragile)
         if f.pages[0] == 1:
             export_front_jpg(f)
     for p in msutils.edition_web_pdfs(edition_date):
