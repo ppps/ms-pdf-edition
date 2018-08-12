@@ -1,5 +1,5 @@
-set export_script to "PATH=/usr/local/bin:$PATH; /usr/bin/env python3 /Volumes/Server/Production\\ Resources/Scripts/ms-pdf-edition/pdf_edition.py"
-set upload_script to "PATH=/usr/local/bin:$PATH; /usr/bin/env python3 /Volumes/Server/Production\\ Resources/Scripts/upload_pdf_edition.py"
+set export_script to "PATH=/usr/local/bin:$PATH LC_ALL=en_GB.UTF-8 /usr/bin/env python3 /Volumes/Server/Production\\ Resources/Scripts/ms-pdf-edition/pdf_edition.py"
+set upload_script to "PATH=/usr/local/bin:$PATH LC_ALL=en_GB.UTF-8 /usr/bin/env python3 -x /Volumes/Server/Production\\ Resources/Scripts/ms-pdf-edition/upload_pdf_edition.py"
 
 set date_options to {"Tomorrow", "Another date"}
 set default_date to {"Tomorrow"}
