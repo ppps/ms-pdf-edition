@@ -14,15 +14,24 @@ import sys
 import boto3
 from docopt import docopt
 
-logging.basicConfig(
-    level=logging.INFO,
+logger = logging.getLogger(name='upload_pdf_edition')
+library_log_handler = logging.FileHandler(
+        filename=Path('~/Library/Logs/pdf_edition.log').expanduser())
+desktop_log_handler = logging.FileHandler(
+        filename=Path('~/Desktop/e-edition-problems.txt').expanduser())
+formatter = logging.Formatter(
     datefmt='%Y-%m-%d %H:%M:%S',
     style='{',
-    format='{asctime}  {levelname}  {name}  {message}',
-    filename=str(Path('~/Library/Logs/pdf_edition.log').expanduser()))
-logger = logging.getLogger(name='upload_pdf_edition')
+    fmt='{asctime}  {levelname}  {name}  {message}')
+library_log_handler.setFormatter(formatter)
+desktop_log_handler.setFormatter(formatter)
+library_log_handler.setLevel(logging.INFO)
+desktop_log_handler.setLevel(logging.ERROR)
+logger.addHandler(library_log_handler)
+logger.addHandler(desktop_log_handler)
 
-if __name__ == '__main__':
+
+def main():
     _server_remote_path = Path('/Volumes/Server/')
     _server_local_path = Path('~/Server/').expanduser()
     if _server_remote_path.exists():
@@ -47,3 +56,10 @@ if __name__ == '__main__':
     logger.info('Uploaded PDF for %s', date)
     s3.upload_file(str(jpg_path), 'pdf.peoples-press.com', jpg_path.name)
     logger.info('Uploaded JPG for %s', date)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        logger.exception('Uncaught exception in main program')
