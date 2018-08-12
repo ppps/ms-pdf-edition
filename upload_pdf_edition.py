@@ -43,7 +43,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     s3 = boto3.client('s3')
-    s3.upload_file(str(pdf_path), 'rjw-ppps', pdf_path.name)
+    s3.upload_file(str(pdf_path), 'pdf.peoples-press.com', pdf_path.name)
     logger.info('Uploaded PDF for %s', date)
-    s3.upload_file(str(jpg_path), 'rjw-ppps', jpg_path.name)
+    s3.upload_file(str(jpg_path), 'pdf.peoples-press.com', jpg_path.name)
     logger.info('Uploaded JPG for %s', date)
