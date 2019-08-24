@@ -49,7 +49,7 @@ COMBINED_PDF_TEMPLATE = '{page.date:MS_%Y_%m_%d.pdf}'
 
 as_export_pdf = '''\
 on export_pdf(posix_path, pdf_export_file, page_to_export)
-	tell application "Adobe InDesign CS4"
+	tell application "Adobe InDesign CC 2019"
 		-- Suppress dialogs
 		set user interaction level of script preferences to never interact
 
@@ -75,7 +75,7 @@ end run
 
 as_export_jpg = '''\
 on export_jpg(posix_path, jpg_export_file)
-	tell application "Adobe InDesign CS4"
+	tell application "Adobe InDesign CC 2019"
 		-- Suppress dialogs
 		set user interaction level of script preferences to never interact
 
