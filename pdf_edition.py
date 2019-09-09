@@ -44,7 +44,7 @@ else:
     logger.critical("Can't find server location.")
     sys.exit(1)
 
-COMBINED_PDF_TEMPLATE = '{page.date:MS_%Y_%m_%d.pdf}'
+COMBINED_PDF_TEMPLATE = 'MS_{date:%Y_%m_%d.pdf}'
 
 
 as_export_pdf = '''\
@@ -173,7 +173,7 @@ def save_combined_pdf(date):
         sys.exit(1)
     combined_file = SERVER_PATH.joinpath(
         'Web PDFs',
-        COMBINED_PDF_TEMPLATE.format(page=files[0]))
+        COMBINED_PDF_TEMPLATE.format(date=date))
 
     export_with_ghostscript(combined_file, *[f.path for f in files])
     logger.info('Saved combined PDF to file: %24s', combined_file.name)
