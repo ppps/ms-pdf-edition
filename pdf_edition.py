@@ -44,12 +44,12 @@ else:
     logger.critical("Can't find server location.")
     sys.exit(1)
 
-COMBINED_PDF_TEMPLATE = 'MS_{date:%Y_%m_%d.pdf}'
+COMBINED_PDF_TEMPLATE = '{page.date:MS_%Y_%m_%d.pdf}'
 
 
 as_export_pdf = '''\
 on export_pdf(posix_path, pdf_export_file, page_to_export)
-	tell application "Adobe InDesign CC 2019"
+	tell application id "com.adobe.InDesign"
 		-- Suppress dialogs
 		set user interaction level of script preferences to never interact
 
@@ -75,7 +75,7 @@ end run
 
 as_export_jpg = '''\
 on export_jpg(posix_path, jpg_export_file)
-	tell application "Adobe InDesign CC 2019"
+	tell application id "com.adobe.InDesign"
 		-- Suppress dialogs
 		set user interaction level of script preferences to never interact
 
@@ -134,6 +134,7 @@ def export_indesign_page(page, date):
             export_names.append(new_name)
 
     for indd_page_num, pdf_name in zip(export_nums, export_names):
+        logger.info('%s %s', export_nums, export_names)
         run_applescript(as_export_pdf.format(
             indesign_file=page.path,
             pdf_file=pdfs_dir.joinpath(pdf_name),
@@ -173,7 +174,7 @@ def save_combined_pdf(date):
         sys.exit(1)
     combined_file = SERVER_PATH.joinpath(
         'Web PDFs',
-        COMBINED_PDF_TEMPLATE.format(date=date))
+        COMBINED_PDF_TEMPLATE.format(page=files[0]))
 
     export_with_ghostscript(combined_file, *[f.path for f in files])
     logger.info('Saved combined PDF to file: %24s', combined_file.name)
